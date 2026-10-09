@@ -75,7 +75,7 @@ function ContactDialog({ dialogRef, topic, onTopicChange }: {
     if (enquiry === null) return;
     try {
       await navigator.clipboard.writeText(enquiry);
-      setStatus('Copied. You can paste your enquiry into a message to the Gather team.');
+      setStatus('Copied. You can paste your enquiry into a message to the Gatherfund LLC team.');
     } catch {
       enquiryRef.current?.focus();
       enquiryRef.current?.select();
@@ -88,7 +88,7 @@ function ContactDialog({ dialogRef, topic, onTopicChange }: {
       <button className="close" aria-label="Close dialog" onClick={() => dialogRef.current?.close()}>×</button>
       <div className="eyebrow">LET’S CONNECT</div>
       <h2>A good place<br />to begin.</h2>
-      <p>Prepare a partnership enquiry to share with the Gather team. This design preview does not send messages.</p>
+      <p>Prepare a partnership enquiry to share with the Gatherfund LLC team. This design preview does not send messages.</p>
       {/* The form stays mounted (only hidden) so "Edit details" returns with the visitor's input intact. */}
       <form id="enquiry" onSubmit={prepare} style={enquiry === null ? undefined : { display: 'none' }}>
         <label>Your name<input name="name" required autoComplete="name" placeholder="Full name" /></label>
@@ -130,7 +130,7 @@ function VentureDialog({ dialogRef, onConnect }: { dialogRef: RefObject<HTMLDial
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="dialog-logo" src="/assets/gatherfund-logo.svg" alt="Gatherfund" />
       <h2>Support that<br />brings us together.</h2>
-      <p>Gatherfund is the fundraising venture in the Gather family. The supplied prototype explores community causes, fundraiser discovery, and giving for Ghana and the diaspora.</p>
+      <p>Gatherfund is the fundraising venture in the Gatherfund LLC family. The supplied prototype explores community causes, fundraiser discovery, and giving for Ghana and the diaspora.</p>
       <div className="dialog-detail">
         <strong>A people-first platform</strong>
         <p>Explore causes, share a fundraising story, and bring supporters around what matters to a community.</p>

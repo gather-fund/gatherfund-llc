@@ -52,7 +52,7 @@ export default function HomePage() {
             <p>We bring people, ideas, and opportunity together to build businesses that move communities forward.</p>
             <div className="hero-actions">
               <a className="button" href="#ventures">Explore our ventures <span aria-hidden="true">↗</span></a>
-              <a className="text-link" href="#about">Get to know Gather <span aria-hidden="true">→</span></a>
+              <a className="text-link" href="#about">Get to know Gatherfund LLC <span aria-hidden="true">→</span></a>
             </div>
             <div className="hero-note"><span className="note-line" />People at the heart. Possibility ahead.</div>
           </div>

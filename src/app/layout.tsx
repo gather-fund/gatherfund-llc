@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import { DialogProvider } from '@/components/Dialogs';
+import { RouteFocus } from '@/components/RouteFocus';
+import { SiteFooter } from '@/components/SiteFooter';
+import { SiteHeader } from '@/components/SiteHeader';
 import { site } from '@/lib/site';
 import './globals.css';
 
@@ -12,10 +16,8 @@ export const metadata: Metadata = {
   authors: [{ name: site.name, url: site.url }],
   creator: site.name,
   publisher: site.name,
-  alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
-    url: '/',
     siteName: site.name,
     title: site.title,
     description: site.description,
@@ -40,8 +42,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    // Smooth scrolling is for in-page section links; data-scroll-behavior lets Next.js jump straight to the top on a page change.
+    <html lang="en" data-scroll-behavior="smooth">
+      <body>
+        <DialogProvider>
+          <a className="skip" href="#main">Skip to content</a>
+          <SiteHeader />
+          <main id="main" tabIndex={-1}>{children}</main>
+          <SiteFooter />
+          <RouteFocus />
+        </DialogProvider>
+      </body>
     </html>
   );
 }

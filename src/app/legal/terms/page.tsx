@@ -4,6 +4,8 @@ import { LegalPage } from '@/components/LegalPage';
 export const metadata: Metadata = {
   title: 'Terms of use',
   alternates: { canonical: '/legal/terms' },
+  // The template has not had legal review; keep it out of search results until it has.
+  robots: { index: false, follow: true },
   openGraph: { url: '/legal/terms' },
 };
 

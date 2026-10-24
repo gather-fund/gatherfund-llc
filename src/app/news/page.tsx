@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   title: 'News',
   alternates: { canonical: '/news' },
   openGraph: { url: '/news' },
+  // While the list still holds placeholder entries, keep it out of search results.
+  ...(ARTICLES.some(article => article.isTemplate) ? { robots: { index: false, follow: true } } : {}),
 };
 
 export default function NewsPage() {

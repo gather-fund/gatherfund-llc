@@ -33,7 +33,7 @@ export function VentureCarousel() {
         />
       ))}
       <div className="image-note supporting">
-        <p aria-live="polite">{SLIDES[current]!.caption}</p>
+        <p aria-live="polite"><span className="visually-hidden">Photo {current + 1} of {SLIDES.length}: </span>{SLIDES[current]!.caption}</p>
         <div className="slide-controls">
           <button type="button" className="slide-button" aria-label="Previous photo" onClick={() => setSlide(value => value - 1)}><ChevronLeftIcon /></button>
           <span className="slide-count micro secondary tnum" aria-hidden="true">{current + 1} / {SLIDES.length}</span>

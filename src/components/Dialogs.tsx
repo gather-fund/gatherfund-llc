@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { ChangeEvent, FormEvent, MouseEvent, ReactNode, RefObject } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent, FormEvent, MouseEvent, PointerEvent, ReactNode, RefObject } from 'react';
+import { checkEnquiry } from '@/lib/enquiry';
+import type { Enquiry, Field, FieldErrors } from '@/lib/enquiry';
 import { company, TOPICS } from '@/lib/site';
 import type { Topic } from '@/lib/site';
 import { CloseIcon, ErrorIcon } from './Icons';
@@ -20,12 +22,25 @@ export function useDialogs(): DialogControls {
   return controls;
 }
 
-// True when a click landed on the backdrop, the area outside the dialog box.
-function isBackdropClick(event: MouseEvent<HTMLDialogElement>): boolean {
+function onBackdrop(event: { target: EventTarget; currentTarget: HTMLDialogElement; clientX: number; clientY: number }): boolean {
   const dialog = event.currentTarget;
   if (event.target !== dialog) return false;
   const rect = dialog.getBoundingClientRect();
   return event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+}
+
+// Closes on a press that both starts and ends on the backdrop, so selecting text and releasing outside the box
+// never closes the dialog.
+function useBackdropClose(onClose: () => void) {
+  const pressedOnBackdrop = useRef(false);
+  return {
+    onPointerDown: (event: PointerEvent<HTMLDialogElement>) => { pressedOnBackdrop.current = onBackdrop(event); },
+    onClick: (event: MouseEvent<HTMLDialogElement>) => {
+      const close = pressedOnBackdrop.current && onBackdrop(event);
+      pressedOnBackdrop.current = false;
+      if (close) onClose();
+    },
+  };
 }
 
 function focusLater(selector: string) {
@@ -66,20 +81,9 @@ export function DialogProvider({ children }: { children: ReactNode }) {
 }
 
 type Phase = 'form' | 'sending' | 'sent' | 'failed' | 'copy';
-type Field = 'name' | 'email' | 'message';
-type Details = { name: string; email: string; topic: Topic; message: string };
-
-function validate(values: Record<Field, string>): { details?: Omit<Details, 'topic'>; errors: Partial<Record<Field, string>> } {
-  const name = values.name.trim();
-  const email = values.email.trim();
-  const message = values.message.trim();
-  const errors: Partial<Record<Field, string>> = {};
-  if (!name) errors.name = 'Enter your name.';
-  if (!email) errors.email = 'Enter your email address.';
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Enter an email address in the format name@example.com.';
-  if (!message) errors.message = 'Enter a message.';
-  return Object.keys(errors).length > 0 ? { errors } : { details: { name, email, message }, errors };
-}
+type Details = Enquiry;
+// Why the last send failed: the service could not deliver it, or this address sent too many in a short time.
+type Failure = 'delivery' | 'rate';
 
 function ContactDialog({ dialogRef, topic, onTopicChange, openCount }: {
   dialogRef: RefObject<HTMLDialogElement | null>;
@@ -88,8 +92,10 @@ function ContactDialog({ dialogRef, topic, onTopicChange, openCount }: {
   openCount: number;
 }) {
   const [values, setValues] = useState<Record<Field, string>>({ name: '', email: '', message: '' });
-  const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [phase, setPhase] = useState<Phase>('form');
+  const [failure, setFailure] = useState<Failure>('delivery');
+  const honeypotRef = useRef<HTMLInputElement>(null);
   const [waitNote, setWaitNote] = useState(false);
   const [sent, setSent] = useState<Details | null>(null);
   const [enquiry, setEnquiry] = useState('');
@@ -99,11 +105,18 @@ function ContactDialog({ dialogRef, topic, onTopicChange, openCount }: {
   // Read inside event handlers that may run before React re-renders.
   const sendingRef = useRef(false);
   const phaseRef = useRef<Phase>('form');
-  phaseRef.current = phase;
+  useLayoutEffect(() => { phaseRef.current = phase; }, [phase]);
 
   // Each time the dialog opens, focus goes to the first field, or to the heading when there is no form to fill in.
+  // Text prepared for copying is not kept across opens: the topic may have changed, so the form comes back.
   useEffect(() => {
     if (openCount === 0) return;
+    if (phaseRef.current === 'copy') {
+      setCopied(null);
+      setPhase('form');
+      focusLater('#f-name');
+      return;
+    }
     focusLater(phaseRef.current === 'form' || phaseRef.current === 'failed' ? '#f-name' : '#contact-title');
   }, [openCount]);
 
@@ -119,6 +132,12 @@ function ContactDialog({ dialogRef, topic, onTopicChange, openCount }: {
   }
 
   function onClosed() {
+    // Browsers without closedby can still let a repeated Escape through while sending: reopen and explain.
+    if (sendingRef.current) {
+      dialogRef.current?.showModal();
+      askToWait();
+      return;
+    }
     // A sent enquiry is finished: the next time the dialog opens it starts a new one.
     if (phaseRef.current === 'sent') {
       setPhase('form');
@@ -139,17 +158,21 @@ function ContactDialog({ dialogRef, topic, onTopicChange, openCount }: {
     };
   }
 
+  function showErrors(next: FieldErrors) {
+    setErrors(next);
+    const first = (['name', 'email', 'message'] as const).find(key => next[key]);
+    if (first) focusLater(`#f-${first}`);
+  }
+
   // Returns the checked details, or shows the errors, moves focus to the first one and returns null.
   function check(): Details | null {
-    const result = validate(values);
-    if (!result.details) {
-      setErrors(result.errors);
-      const first = (['name', 'email', 'message'] as const).find(key => result.errors[key]);
-      if (first) focusLater(`#f-${first}`);
+    const result = checkEnquiry({ ...values, topic });
+    if (!result.enquiry) {
+      showErrors(result.errors);
       return null;
     }
     setErrors({});
-    return { ...result.details, topic };
+    return result.enquiry;
   }
 
   async function send(event?: FormEvent) {
@@ -160,24 +183,39 @@ function ContactDialog({ dialogRef, topic, onTopicChange, openCount }: {
     sendingRef.current = true;
     setWaitNote(false);
     setPhase('sending');
-    let ok = false;
+    let outcome: 'sent' | 'invalid' | Failure = 'delivery';
+    let fields: FieldErrors = {};
     try {
       const response = await fetch('/api/enquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(details),
+        body: JSON.stringify({ ...details, website: honeypotRef.current?.value ?? '' }),
       });
-      ok = response.ok;
+      if (response.ok) outcome = 'sent';
+      else if (response.status === 429) outcome = 'rate';
+      else if (response.status === 422) {
+        // The server found a problem the form did not: show it on the field, as the form would.
+        const body: unknown = await response.json().catch(() => null);
+        const reported = (body as { fields?: FieldErrors } | null)?.fields;
+        if (reported && Object.keys(reported).length > 0) {
+          outcome = 'invalid';
+          fields = reported;
+        }
+      }
     } catch {
-      ok = false;
+      outcome = 'delivery';
     }
     sendingRef.current = false;
     setWaitNote(false);
-    if (ok) {
+    if (outcome === 'sent') {
       setSent(details);
       setPhase('sent');
       focusLater('#sent-done');
+    } else if (outcome === 'invalid') {
+      setPhase('form');
+      showErrors(fields);
     } else {
+      setFailure(outcome);
       setPhase('failed');
       focusLater('#send-enquiry');
     }
@@ -211,6 +249,9 @@ function ContactDialog({ dialogRef, topic, onTopicChange, openCount }: {
       : ['Ready to copy', `Nothing has been sent. Copy your enquiry and paste it into an email to ${company.contactEmail}.`];
 
   const showForm = phase === 'form' || phase === 'sending' || phase === 'failed';
+  const backdrop = useBackdropClose(close);
+  // closedby="none" stops Escape and other close requests while sending (Chrome 134 and later); onClosed covers the rest.
+  const closedBy = { closedby: sending ? 'none' : 'any' } as Record<string, string>;
   const fieldClass = (field: Field) => (errors[field] ? 'field invalid' : 'field');
   const describedBy = (field: Field, hint?: string) => [hint, errors[field] ? `f-${field}-error` : undefined].filter(Boolean).join(' ') || undefined;
 
@@ -220,7 +261,9 @@ function ContactDialog({ dialogRef, topic, onTopicChange, openCount }: {
       id="contact-dialog"
       ref={dialogRef}
       aria-labelledby="contact-title"
-      onClick={event => { if (isBackdropClick(event)) close(); }}
+      {...closedBy}
+      {...backdrop}
+      onKeyDown={event => { if (event.key === 'Escape' && sendingRef.current) askToWait(); }}
       onCancel={event => { if (sendingRef.current) { event.preventDefault(); askToWait(); } }}
       onClose={onClosed}
     >
@@ -258,9 +301,14 @@ function ContactDialog({ dialogRef, topic, onTopicChange, openCount }: {
             </div>
             <div className={fieldClass('message')}>
               <label htmlFor="f-message">Your message</label>
-              <p className="supporting secondary" id="f-message-hint">A few sentences is enough.</p>
+              <p className="supporting secondary" id="f-message-hint">A few sentences is enough, up to 5,000 characters.</p>
               <textarea id="f-message" name="message" rows={4} value={values.message} readOnly={sending} onChange={onField('message')} aria-invalid={Boolean(errors.message)} aria-describedby={describedBy('message', 'f-message-hint')} />
               {errors.message && <p className="field-error" id="f-message-error"><ErrorIcon /><span>Error: {errors.message}</span></p>}
+            </div>
+            {/* Left empty by people, who never see it; bots that fill it are ignored by the server. */}
+            <div className="visually-hidden" inert>
+              <label htmlFor="f-website">Website</label>
+              <input id="f-website" name="website" ref={honeypotRef} autoComplete="off" defaultValue="" />
             </div>
             <div className="consent">
               <p className="supporting secondary">We’ll use the details you enter to reply to your enquiry. Your message stays in this form if you open the privacy notice.</p>
@@ -282,7 +330,11 @@ function ContactDialog({ dialogRef, topic, onTopicChange, openCount }: {
                 {phase === 'failed' && (
                   <div className="banner danger" id="send-failed">
                     <strong>Not sent</strong>
-                    <span>We couldn’t send your enquiry, so the Gatherfund LLC team has not received it. Your message is still here. Try again, or copy your enquiry and email us at {company.contactEmail}.</span>
+                    <span>
+                      {failure === 'rate'
+                        ? `You’ve sent several enquiries in the last few minutes, so this one has not been sent. Your message is still here. Try again in 10 minutes, or copy your enquiry and email us at ${company.contactEmail}.`
+                        : `We couldn’t send your enquiry, so the Gatherfund LLC team has not received it. Your message is still here. Try again, or copy your enquiry and email us at ${company.contactEmail}.`}
+                    </span>
                   </div>
                 )}
               </div>
@@ -368,13 +420,14 @@ function ContactDialog({ dialogRef, topic, onTopicChange, openCount }: {
 }
 
 function VentureDialog({ dialogRef, onAsk }: { dialogRef: RefObject<HTMLDialogElement | null>; onAsk: () => void }) {
+  const backdrop = useBackdropClose(() => dialogRef.current?.close());
   return (
     <dialog
       className="dlg"
       id="venture-dialog"
       ref={dialogRef}
       aria-labelledby="venture-dialog-title"
-      onClick={event => { if (isBackdropClick(event)) dialogRef.current?.close(); }}
+      {...backdrop}
     >
       <div className="dlg-head">
         {/* eslint-disable-next-line @next/next/no-img-element -- static brand artwork */}

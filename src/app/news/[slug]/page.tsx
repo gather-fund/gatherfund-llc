@@ -21,6 +21,8 @@ export async function generateMetadata({ params }: PageProps<'/news/[slug]'>): P
     description: article.summary,
     alternates: { canonical: `/news/${slug}` },
     openGraph: { url: `/news/${slug}`, type: 'article' },
+    // Placeholder articles stay out of search results until they hold real news.
+    ...(article.isTemplate ? { robots: { index: false, follow: true } } : {}),
   };
 }
 

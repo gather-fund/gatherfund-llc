@@ -164,9 +164,9 @@ p { text-wrap: pretty; }
 .hero-copy { display: grid; gap: var(--space-6); justify-items: start; }
 .hero-art { position: relative; width: 100%; max-width: 480px; aspect-ratio: 1 / 1; margin-inline: auto; }
 .art-circle { position: absolute; inset-block-start: 3%; inset-inline-end: 0; width: 84%; aspect-ratio: 1 / 1; border-radius: 50%; background: var(--color-surface-subtle); }
-.hero-photo { position: absolute; inset-block-start: 6%; inset-inline-start: 4%; width: 68%; height: 78%; object-fit: cover; object-position: 64% 50%; border-radius: 999px 999px var(--radius-card) var(--radius-card); outline: 1px solid rgba(0,0,0,.1); outline-offset: -1px; }
+.hero-photo { position: absolute; inset-block-start: 6%; inset-inline-start: 4%; width: 68%; height: 78%; object-fit: cover; object-position: 64% 50%; border-radius: var(--radius-pill) var(--radius-pill) var(--radius-card) var(--radius-card); outline: 1px solid rgba(0,0,0,.1); outline-offset: -1px; }
 .mini-photo { position: absolute; inset-block-start: 46%; inset-inline-end: 0; width: 36%; aspect-ratio: 5 / 6; padding: var(--space-2); border-radius: var(--radius-card); background: var(--color-canvas); rotate: 6deg; }
-.mini-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--space-2); outline: 1px solid rgba(0,0,0,.1); outline-offset: -1px; }
+.mini-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--radius-card) - var(--space-2)); outline: 1px solid rgba(0,0,0,.1); outline-offset: -1px; }
 .gather-card { position: absolute; inset-block-end: 2%; inset-inline-start: 0; display: flex; align-items: center; gap: var(--space-3); max-width: 78%; padding: var(--space-4); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-card); background: var(--color-surface); box-shadow: var(--shadow-raised); rotate: -3deg; }
 .gather-card img { flex: none; width: 36px; height: auto; }
 .gather-card strong { font-weight: 500; }
@@ -175,7 +175,7 @@ p { text-wrap: pretty; }
 .purpose-in { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3) var(--space-8); padding-block: var(--space-6); }
 .purpose-list { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-6); font-weight: 500; }
 .purpose-list li { display: inline-flex; align-items: center; gap: var(--space-6); }
-.purpose-list li + li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--color-border-control); }
+.purpose-list li:not(:last-child)::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--color-border-control); }
 
 /* Sections. */
 .heading-group { display: grid; gap: var(--space-4); justify-items: start; align-content: start; }
@@ -198,7 +198,7 @@ p { text-wrap: pretty; }
 /* Featured-venture photo carousel. */
 .venture-image { position: relative; min-height: 280px; margin: var(--space-2); }
 @media (min-width: 860px) { .venture-image { min-height: 400px; } }
-.slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: var(--space-2); outline: 1px solid rgba(0,0,0,.1); outline-offset: -1px; opacity: 0; transition: opacity var(--duration-disclosure) var(--ease-standard); }
+.slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--radius-card) - var(--space-2)); outline: 1px solid rgba(0,0,0,.1); outline-offset: -1px; opacity: 0; transition: opacity var(--duration-disclosure) var(--ease-standard); }
 .slide[data-current] { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .slide { transition: none; } }
 .image-note { position: absolute; inset-inline: var(--space-4); inset-block-end: var(--space-4); display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) var(--space-4); border-radius: var(--radius-control); background: var(--color-surface); box-shadow: var(--shadow-raised); }
@@ -248,7 +248,7 @@ p { text-wrap: pretty; }
 .local-nav .nav-link { padding-inline: 0; }
 
 /* Status banner (design system: StatusBanner). Status is always said in words as well as colour. */
-.banner { display: grid; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-control); background: var(--color-info-surface); font-size: 0.9375rem; line-height: 1.5; }
+.banner { display: grid; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-control); background: var(--color-info-surface); font-size: 1rem; line-height: 1.5; }
 .banner strong { color: var(--color-info); font-weight: 500; }
 .banner.success { background: var(--color-success-surface); }
 .banner.success strong { color: var(--color-success); }
@@ -285,7 +285,7 @@ p { text-wrap: pretty; }
 /* Dialogs: native <dialog> opened with showModal(), so the page behind is inert and Escape closes it. */
 dialog.dlg { display: none; width: min(520px, calc(100% - 2 * var(--space-4))); max-width: none; max-height: calc(100dvh - 2 * var(--space-4)); margin: auto; overflow-y: auto; overscroll-behavior: contain; padding: var(--space-6); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-modal); background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-raised); }
 dialog.dlg[open] { display: grid; gap: var(--space-4); }
-dialog.dlg::backdrop { background: rgba(33,27,45,.55); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+dialog.dlg::backdrop { background: color-mix(in srgb, var(--color-text) 55%, transparent); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 @media (min-width: 600px) { dialog.dlg { padding: var(--space-8); } }
 .dlg-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
 .dlg-head .icon-button { flex: none; margin-block-start: -8px; margin-inline-end: -8px; }

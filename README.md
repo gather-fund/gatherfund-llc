@@ -20,9 +20,9 @@ The enquiry form only prepares text to copy. It does not send anything.
 
 Build for production with `npm run build:prod`. It sets `SITE_URL=https://gatherfund.llc`, which drives the canonical URL, Open Graph and Twitter tags, `sitemap.xml`, `robots.txt` and the JSON-LD.
 
-Without `SITE_URL` the build is treated as local or preview: pages are `noindex, nofollow` and `robots.txt` disallows everything.
+On Vercel, a build without `SITE_URL` uses Vercel's own variables instead: the production domain for production builds (indexable) and the deployment's address for previews (`noindex`). Anywhere else, a build without `SITE_URL` is treated as local: absolute URLs point at the dev server, pages are `noindex, nofollow` and `robots.txt` disallows everything. Share previews only work when these URLs are public.
 
 - `src/lib/site.ts`: site name, title, description and URL
-- `src/app/opengraph-image.tsx`: the social share image (1200×630), generated at build time
+- `public/og-image.png`: the social share image (1200×630), rendered from `scripts/og/og.html` with `scripts/og/render.sh` (macOS); `src/lib/metadata.ts` puts it on every page
 - `src/app/icon.svg`, `src/app/apple-icon.tsx`: favicon and Apple touch icon
 - `src/app/robots.ts`, `src/app/sitemap.ts`, `src/app/manifest.ts`

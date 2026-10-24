@@ -1,15 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ClosingSection, PageHead, TemplateBanner } from '@/components/Sections';
+import { pageMetadata } from '@/lib/metadata';
 import { ARTICLES } from '@/lib/news';
 
-export const metadata: Metadata = {
-  title: 'News',
-  alternates: { canonical: '/news' },
-  openGraph: { url: '/news' },
-  // While the list still holds placeholder entries, keep it out of search results.
-  ...(ARTICLES.some(article => article.isTemplate) ? { robots: { index: false, follow: true } } : {}),
-};
+// While the list still holds placeholder entries, keep it out of search results.
+export const metadata: Metadata = pageMetadata({ title: 'News', path: '/news', indexable: !ARTICLES.some(article => article.isTemplate) });
 
 export default function NewsPage() {
   const showsTemplate = ARTICLES.some(article => article.isTemplate);

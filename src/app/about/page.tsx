@@ -2,13 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PersonIcon } from '@/components/Icons';
 import { ClosingSection, PageHead, TemplateBanner } from '@/components/Sections';
+import { pageMetadata } from '@/lib/metadata';
 import { company } from '@/lib/site';
 
-export const metadata: Metadata = {
-  title: 'About us',
-  alternates: { canonical: '/about' },
-  openGraph: { url: '/about' },
-};
+export const metadata: Metadata = pageMetadata({ title: 'About us', path: '/about' });
 
 const WAYS = [
   { title: 'A clear purpose.', body: 'We give every venture a clear reason to exist and keep the people it serves at the centre.' },

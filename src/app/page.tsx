@@ -6,13 +6,10 @@ import { ContactTrigger, VentureTrigger } from '@/components/Dialogs';
 import { ArrowUpRightIcon, PeopleIcon, PlusIcon, TargetIcon, TrendIcon } from '@/components/Icons';
 import { ClosingSection } from '@/components/Sections';
 import { VentureCarousel } from '@/components/VentureCarousel';
+import { pageMetadata } from '@/lib/metadata';
 import { site } from '@/lib/site';
 
-export const metadata: Metadata = {
-  title: { absolute: site.title },
-  alternates: { canonical: '/' },
-  openGraph: { url: '/' },
-};
+export const metadata: Metadata = pageMetadata({ path: '/' });
 
 const STRUCTURED_DATA = {
   '@context': 'https://schema.org',

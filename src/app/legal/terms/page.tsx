@@ -1,13 +1,9 @@
 import type { Metadata } from 'next';
 import { LegalPage } from '@/components/LegalPage';
+import { pageMetadata } from '@/lib/metadata';
 
-export const metadata: Metadata = {
-  title: 'Terms of use',
-  alternates: { canonical: '/legal/terms' },
-  // The template has not had legal review; keep it out of search results until it has.
-  robots: { index: false, follow: true },
-  openGraph: { url: '/legal/terms' },
-};
+// The template has not had legal review; keep it out of search results until it has.
+export const metadata: Metadata = pageMetadata({ title: 'Terms of use', path: '/legal/terms', indexable: false });
 
 const SECTIONS = [
   ['About these terms', '[WHAT THESE TERMS COVER AND WHEN THEY APPLY]'],

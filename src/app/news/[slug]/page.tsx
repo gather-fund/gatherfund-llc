@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { ContactTrigger } from '@/components/Dialogs';
 import { ChevronLeftIcon } from '@/components/Icons';
 import { TemplateBanner } from '@/components/Sections';
+import { pageMetadata } from '@/lib/metadata';
 import { ARTICLES, findArticle } from '@/lib/news';
 
 export const dynamicParams = false;
@@ -16,14 +17,8 @@ export async function generateMetadata({ params }: PageProps<'/news/[slug]'>): P
   const { slug } = await params;
   const article = findArticle(slug);
   if (!article) return {};
-  return {
-    title: `${article.headline} | News`,
-    description: article.summary,
-    alternates: { canonical: `/news/${slug}` },
-    openGraph: { url: `/news/${slug}`, type: 'article' },
-    // Placeholder articles stay out of search results until they hold real news.
-    ...(article.isTemplate ? { robots: { index: false, follow: true } } : {}),
-  };
+  // Placeholder articles stay out of search results until they hold real news.
+  return pageMetadata({ title: `${article.headline} | News`, path: `/news/${slug}`, description: article.summary, type: 'article', indexable: !article.isTemplate });
 }
 
 function AllNews() {

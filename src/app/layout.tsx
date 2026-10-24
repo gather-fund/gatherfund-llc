@@ -4,6 +4,7 @@ import { DialogProvider } from '@/components/Dialogs';
 import { RouteFocus } from '@/components/RouteFocus';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
+import { SHARE_IMAGE } from '@/lib/metadata';
 import { site } from '@/lib/site';
 import './globals.css';
 
@@ -22,11 +23,13 @@ export const metadata: Metadata = {
     title: site.title,
     description: site.description,
     locale: 'en_US',
+    images: [SHARE_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: site.title,
     description: site.description,
+    images: [SHARE_IMAGE],
   },
   robots: site.indexable
     ? { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } }

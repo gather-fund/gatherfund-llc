@@ -11,3 +11,16 @@ export const site = {
   indexable: configuredUrl !== undefined,
   themeColor: '#6941a5',
 } as const;
+
+// Company facts the design shows in brackets because Gatherfund LLC has not supplied them yet.
+// Replace each value here once it is known; every page reads them from this one place.
+export const company = {
+  contactEmail: '[CONTACT EMAIL]',
+  responseTime: '[RESPONSE TIME]',
+  registeredAddress: '[REGISTERED ADDRESS]',
+  registrationNumber: '[REGISTRATION NUMBER]',
+  placeOfRegistration: '[PLACE OF REGISTRATION]',
+} as const;
+
+export const TOPICS = ['Partnership opportunities', 'A new venture idea', 'Gatherfund', 'A general enquiry'] as const;
+export type Topic = (typeof TOPICS)[number];

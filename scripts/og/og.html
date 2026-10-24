@@ -1,0 +1,52 @@
+<!doctype html>
+<!-- Source of public/og-image.png (1200×630). Render it with scripts/og/render.sh.
+     Fonts, colours and photos are the site's own: public/fonts, the tokens in src/app/globals.css and public/assets. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Inter; font-weight: 400 700; src: url(../../public/fonts/inter-latin.woff2) format("woff2"); }
+  :root {
+    --color-canvas: #FAF9FD; --color-surface: #FFFFFF; --color-surface-subtle: #F3EFFA;
+    --color-text: #211B2D; --color-text-secondary: #625B70; --color-brand: #6941A5; --color-border-subtle: #DDD6E8;
+    --shadow-raised: 0 4px 20px -2px rgba(33,27,45,.08);
+    --radius-card: 16px; --radius-pill: 999px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body { position: relative; background: var(--color-canvas); color: var(--color-text); font-family: Inter, sans-serif; -webkit-font-smoothing: antialiased; }
+  .copy { position: absolute; inset-block: 64px; inset-inline-start: 72px; width: 600px; display: flex; flex-direction: column; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand img { width: 208px; height: auto; display: block; }
+  .brand span { padding-inline-start: 12px; border-inline-start: 1px solid var(--color-border-subtle); color: var(--color-text-secondary); font-size: 18px; font-weight: 500; letter-spacing: 0.06em; }
+  .eyebrow { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; margin-block-start: auto; padding: 8px 16px; border-radius: var(--radius-pill); background: var(--color-surface-subtle); color: var(--color-brand); font-size: 17px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+  .eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  h1 { margin: 20px 0 0; font-size: 68px; line-height: 1.08; font-weight: 600; letter-spacing: -0.02em; }
+  /* The approved brand exception: one italic Georgia word. */
+  h1 em { font-family: Georgia, serif; font-style: italic; font-weight: 400; color: var(--color-brand); }
+  p { margin: 20px 0 0; max-width: 540px; color: var(--color-text-secondary); font-size: 22px; line-height: 1.45; }
+  .art { position: absolute; inset-block-start: 40px; inset-inline-end: 56px; width: 470px; height: 550px; }
+  .circle { position: absolute; inset-block-start: 10px; inset-inline-end: 0; width: 400px; height: 400px; border-radius: 50%; background: var(--color-surface-subtle); }
+  .photo { position: absolute; inset-block-start: 40px; inset-inline-start: 24px; width: 320px; height: 420px; object-fit: cover; object-position: 64% 50%; border-radius: var(--radius-pill) var(--radius-pill) var(--radius-card) var(--radius-card); outline: 1px solid rgba(0,0,0,.1); outline-offset: -1px; }
+  .mini { position: absolute; inset-block-start: 250px; inset-inline-end: 0; width: 170px; height: 204px; padding: 8px; border-radius: var(--radius-card); background: var(--color-canvas); rotate: 6deg; }
+  .mini img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; outline: 1px solid rgba(0,0,0,.1); outline-offset: -1px; display: block; }
+  .card { position: absolute; inset-block-end: 24px; inset-inline-start: 0; display: flex; align-items: center; gap: 14px; padding: 18px 22px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-card); background: var(--color-surface); box-shadow: var(--shadow-raised); rotate: -3deg; font-size: 20px; }
+  .card img { width: 44px; height: auto; display: block; }
+  .card strong { font-weight: 500; }
+</style>
+</head>
+<body>
+  <div class="copy">
+    <div class="brand"><img src="../../public/assets/gatherfund-logo.svg" alt=""><span>LLC</span></div>
+    <div class="eyebrow"><i></i>Many possibilities. One shared purpose.</div>
+    <h1>Good things begin when we <em>gather.</em></h1>
+    <p>We bring people, ideas, and opportunity together to build businesses that move communities forward.</p>
+  </div>
+  <div class="art">
+    <div class="circle"></div>
+    <img class="photo" src="../../public/assets/mother-daughter.jpg" alt="">
+    <div class="mini"><img src="../../public/assets/classroom.jpg" alt=""></div>
+    <div class="card"><img src="../../public/assets/gatherfund-icon.svg" alt=""><span>Many hands. <strong>Shared progress.</strong></span></div>
+  </div>
+</body>
+</html>

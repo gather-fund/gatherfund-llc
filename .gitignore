@@ -4,3 +4,7 @@ out/
 next-env.d.ts
 *.tsbuildinfo
 .DS_Store
+
+# Local settings and secrets (for example ENQUIRY_WEBHOOK_URL). Commit only examples.
+.env*
+!.env.example

@@ -1,5 +1,5 @@
 import { checkEnquiry } from '@/lib/enquiry';
-import { TOPICS } from '@/lib/site';
+import { site, TOPICS } from '@/lib/site';
 
 // Receives an enquiry from the contact dialog and forwards it as JSON to ENQUIRY_WEBHOOK_URL (set at run time,
 // for example an email or form service). Until that is configured nothing can be delivered, so the endpoint
@@ -95,7 +95,8 @@ export async function POST(request: Request) {
     const response = await fetch(target, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...result.enquiry, receivedAt: new Date().toISOString() }),
+      // site says which company's website it came from, for when several sites share one inbox.
+      body: JSON.stringify({ ...result.enquiry, site: site.name, receivedAt: new Date().toISOString() }),
       signal: AbortSignal.timeout(10_000),
     });
     if (!response.ok) {

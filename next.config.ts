@@ -11,8 +11,11 @@ const vercelLive = isVercelPreview ? ' https://vercel.live' : '';
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}${vercelLive}`,
+  // No inline event-handler attributes (onclick="…"); React attaches its handlers in script.
+  "script-src-attr 'none'",
   `style-src 'self' 'unsafe-inline'${vercelLive}`,
-  `img-src 'self' blob: data:${isVercelPreview ? ' https://vercel.live https://vercel.com' : ''}`,
+  // data: is for the SVG brand mark inlined as a data URI (src/lib/brand-mark.ts); nothing uses blob: URLs.
+  `img-src 'self' data:${isVercelPreview ? ' https://vercel.live https://vercel.com' : ''}`,
   `font-src 'self'${isVercelPreview ? ' https://vercel.live https://assets.vercel.com' : ''}`,
   `connect-src 'self'${isVercelPreview ? ' https://vercel.live wss://ws-us3.pusher.com' : ''}`,
   `frame-src ${isVercelPreview ? 'https://vercel.live' : "'none'"}`,
@@ -28,6 +31,10 @@ const config: NextConfig = {
   poweredByHeader: false,
   async headers() {
     return [{
+      // Font files rarely change but their names carry no hash, so they are cached for 30 days rather than forever.
+      source: '/fonts/:path*',
+      headers: [{ key: 'Cache-Control', value: 'public, max-age=2592000' }],
+    }, {
       source: '/:path*',
       headers: [
         { key: 'Content-Security-Policy', value: csp },

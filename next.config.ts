@@ -1,5 +1,28 @@
 import type { NextConfig } from 'next';
 
+const isDev = process.env.NODE_ENV === 'development';
+// Vercel preview deployments load the Vercel toolbar (comments on previews), which needs its own sources.
+const isVercelPreview = process.env.VERCEL_ENV === 'preview';
+const vercelLive = isVercelPreview ? ' https://vercel.live' : '';
+
+// Content-Security-Policy without nonces, as in the Next.js CSP guide, so pages stay statically rendered.
+// Scripts are limited to this site; 'unsafe-inline' covers the inline scripts Next.js adds to static pages,
+// and 'unsafe-eval' is only for React's development tools. Everything else is locked to this site.
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}${vercelLive}`,
+  `style-src 'self' 'unsafe-inline'${vercelLive}`,
+  `img-src 'self' blob: data:${isVercelPreview ? ' https://vercel.live https://vercel.com' : ''}`,
+  `font-src 'self'${isVercelPreview ? ' https://vercel.live https://assets.vercel.com' : ''}`,
+  `connect-src 'self'${isVercelPreview ? ' https://vercel.live wss://ws-us3.pusher.com' : ''}`,
+  `frame-src ${isVercelPreview ? 'https://vercel.live' : "'none'"}`,
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  ...(isDev ? [] : ['upgrade-insecure-requests']),
+].join('; ');
+
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -7,6 +30,7 @@ const config: NextConfig = {
     return [{
       source: '/:path*',
       headers: [
+        { key: 'Content-Security-Policy', value: csp },
         { key: 'X-Content-Type-Options', value: 'nosniff' },
         { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         { key: 'X-Frame-Options', value: 'DENY' },

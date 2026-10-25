@@ -1,0 +1,49 @@
+# Install, typecheck and build the site on every pull request and every push to main.
+#
+# Needs no secrets, so it runs on fork and Dependabot pull requests too. The build reads only optional environment
+# variables (SITE_URL, ENQUIRY_WEBHOOK_URL and Vercel's own); without them it builds the same static pages, pointing
+# at the local dev address and marked not indexable, which is fine for a check. There is no lint script, so no lint step.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# One run per branch. A newer push to a pull request cancels the older run; on main runs are not cancelled, but
+# GitHub keeps only the newest waiting run, so of several quick pushes the ones in between may be skipped.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  build:
+    name: Typecheck and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
